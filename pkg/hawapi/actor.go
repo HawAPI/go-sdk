@@ -1,6 +1,10 @@
 package hawapi
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 const actorOrigin = "actors"
 
@@ -27,27 +31,94 @@ type Actor struct {
 	Thumbnail   string    `json:"thumbnail,omitempty"`
 	Images      []string  `json:"images,omitempty"`
 	Sources     []string  `json:"sources,omitempty"`
-	CreatedAt   string    `json:"created_at"`
-	UpdatedAt   string    `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type CreateActor struct {
+	FirstName   string   `json:"first_name"`
+	LastName    string   `json:"last_name"`
+	Nicknames   []string `json:"nicknames,omitempty"`
+	Socials     []Social `json:"socials,omitempty"`
+	Nationality string   `json:"nationality,omitempty"`
+	BirthDate   string   `json:"birth_date,omitempty"`
+	DeathDate   string   `json:"death_date,omitempty"`
+	Gender      int      `json:"gender"`
+	Seasons     []string `json:"seasons,omitempty"`
+	Awards      []string `json:"awards,omitempty"`
+	Character   string   `json:"character"`
+	Thumbnail   string   `json:"thumbnail,omitempty"`
+	Images      []string `json:"images,omitempty"`
+	Sources     []string `json:"sources,omitempty"`
+}
+
+type ActorResponse struct {
+	BaseResponse
+	Data Actor `json:"data"`
+}
+
+type ActorListResponse struct {
+	BaseResponse
+	Data []Actor `json:"data"`
 }
 
 // ListActors will get all actors
-func (c *Client) ListActors() ([]Actor, error) {
+func (c *Client) ListActors() (ActorListResponse, error) {
 	var actors []Actor
+	var res ActorListResponse
 
-	err := c.get(actorOrigin, uuid.Nil, &actors)
+	doRes, err := c.doGetRequest(c.options.Endpoint+"/"+c.options.Version+"/"+actorOrigin, &actors)
 	if err != nil {
-		return actors, err
+		return res, err
 	}
 
-	return actors, nil
+	res = ActorListResponse{
+		BaseResponse: doRes,
+		Data:         actors,
+	}
+
+	return res, nil
 }
 
-// FindActor will get a single actor by UUID
-func (c *Client) FindActor(id uuid.UUID) (Actor, error) {
+// FindActor will get a single item by uuid
+func (c *Client) FindActor(id uuid.UUID) (ActorResponse, error) {
+	var actor Actor
+	var res ActorResponse
+
+	doRes, err := c.doGetRequest(c.options.Endpoint+"/"+c.options.Version+"/"+actorOrigin+"/"+id.String(), &actor)
+	if err != nil {
+		return res, err
+	}
+
+	res = ActorResponse{
+		BaseResponse: doRes,
+		Data:         actor,
+	}
+
+	return res, nil
+}
+
+func (c *Client) RandomActor() (ActorResponse, error) {
+	var actor Actor
+	var res ActorResponse
+
+	doRes, err := c.doGetRequest(c.options.Endpoint+"/"+c.options.Version+"/"+actorOrigin+"/random", actor)
+	if err != nil {
+		return res, err
+	}
+
+	res = ActorResponse{
+		BaseResponse: doRes,
+		Data:         actor,
+	}
+
+	return res, nil
+}
+
+func (c *Client) CreateActor(s CreateActor) (Actor, error) {
 	var actor Actor
 
-	err := c.get(actorOrigin, id, &actor)
+	err := c.doPostRequest(c.options.Endpoint+"/"+c.options.Version+"/"+actorOrigin, s, &actor)
 	if err != nil {
 		return actor, err
 	}
@@ -55,14 +126,6 @@ func (c *Client) FindActor(id uuid.UUID) (Actor, error) {
 	return actor, nil
 }
 
-// RandomActor will get a single and random actor
-func (c *Client) RandomActor() (Actor, error) {
-	var actor Actor
-
-	err := c.get(actorOrigin+"/random", uuid.Nil, &actor)
-	if err != nil {
-		return actor, err
-	}
-
-	return actor, nil
+func (c *Client) DeleteActor(id uuid.UUID) error {
+	return c.doDeleteRequest(c.options.Endpoint + "/" + c.options.Version + "/" + actorOrigin + "/" + id.String())
 }
