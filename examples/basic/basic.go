@@ -8,11 +8,15 @@ import (
 
 func main() {
 	client := hawapi.NewClient()
+	client.WithOpts(hawapi.Options{
+		Endpoint: "http://localhost:8080/api",
+	})
 
-	actors, err := client.ListActors()
+	res, err := client.ListActors()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
-	fmt.Println(actors)
+	fmt.Println(res)
 }
