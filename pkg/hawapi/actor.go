@@ -36,21 +36,23 @@ type Actor struct {
 }
 
 type CreateActor struct {
-	FirstName   string   `json:"first_name"`
-	LastName    string   `json:"last_name"`
+	FirstName   string   `json:"first_name,omitempty"`
+	LastName    string   `json:"last_name,omitempty"`
 	Nicknames   []string `json:"nicknames,omitempty"`
 	Socials     []Social `json:"socials,omitempty"`
 	Nationality string   `json:"nationality,omitempty"`
 	BirthDate   string   `json:"birth_date,omitempty"`
 	DeathDate   string   `json:"death_date,omitempty"`
-	Gender      int      `json:"gender"`
+	Gender      int      `json:"gender,omitempty"`
 	Seasons     []string `json:"seasons,omitempty"`
 	Awards      []string `json:"awards,omitempty"`
-	Character   string   `json:"character"`
+	Character   string   `json:"character,omitempty"`
 	Thumbnail   string   `json:"thumbnail,omitempty"`
 	Images      []string `json:"images,omitempty"`
 	Sources     []string `json:"sources,omitempty"`
 }
+
+type PatchActor = CreateActor
 
 type ActorResponse struct {
 	BaseResponse
@@ -63,11 +65,16 @@ type ActorListResponse struct {
 }
 
 // ListActors will get all actors
-func (c *Client) ListActors() (ActorListResponse, error) {
+func (c *Client) ListActors(options ...ListOptions) (ActorListResponse, error) {
 	var actors []Actor
 	var res ActorListResponse
 
-	doRes, err := c.doGetRequest(c.options.Endpoint+"/"+c.options.Version+"/"+actorOrigin, &actors)
+	opts := c.newListOptions()
+	for _, opt := range options {
+		opt(opts)
+	}
+
+	doRes, err := c.doGetRequest(actorOrigin, opts, &actors)
 	if err != nil {
 		return res, err
 	}
@@ -85,7 +92,7 @@ func (c *Client) FindActor(id uuid.UUID) (ActorResponse, error) {
 	var actor Actor
 	var res ActorResponse
 
-	doRes, err := c.doGetRequest(c.options.Endpoint+"/"+c.options.Version+"/"+actorOrigin+"/"+id.String(), &actor)
+	doRes, err := c.doGetRequest(actorOrigin+"/"+id.String(), nil, &actor)
 	if err != nil {
 		return res, err
 	}
@@ -102,7 +109,7 @@ func (c *Client) RandomActor() (ActorResponse, error) {
 	var actor Actor
 	var res ActorResponse
 
-	doRes, err := c.doGetRequest(c.options.Endpoint+"/"+c.options.Version+"/"+actorOrigin+"/random", actor)
+	doRes, err := c.doGetRequest(actorOrigin+"/random", nil, actor)
 	if err != nil {
 		return res, err
 	}
@@ -118,7 +125,7 @@ func (c *Client) RandomActor() (ActorResponse, error) {
 func (c *Client) CreateActor(s CreateActor) (Actor, error) {
 	var actor Actor
 
-	err := c.doPostRequest(c.options.Endpoint+"/"+c.options.Version+"/"+actorOrigin, s, &actor)
+	err := c.doPostRequest(actorOrigin, s, &actor)
 	if err != nil {
 		return actor, err
 	}
@@ -126,6 +133,23 @@ func (c *Client) CreateActor(s CreateActor) (Actor, error) {
 	return actor, nil
 }
 
+func (c *Client) PatchActor(id uuid.UUID, p PatchActor) (Actor, error) {
+	var actor Actor
+
+	err := c.doPatchRequest(actorOrigin+"/"+id.String(), &p)
+	if err != nil {
+		return actor, err
+	}
+
+	res, err := c.FindActor(id)
+	if err != nil {
+		return actor, err
+	}
+
+	actor = res.Data
+	return actor, nil
+}
+
 func (c *Client) DeleteActor(id uuid.UUID) error {
-	return c.doDeleteRequest(c.options.Endpoint + "/" + c.options.Version + "/" + actorOrigin + "/" + id.String())
+	return c.doDeleteRequest(actorOrigin + "/" + id.String())
 }

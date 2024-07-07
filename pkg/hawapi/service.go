@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -68,9 +69,10 @@ func (c *Client) doRequest(req *http.Request, wantStatus int, out any) (http.Hea
 	return res.Header, nil
 }
 
-func (c *Client) doGetRequest(url string, out any) (BaseResponse, error) {
+func (c *Client) doGetRequest(origin string, opts *listOptions, out any) (BaseResponse, error) {
 	var res BaseResponse
 
+	url := c.buildUrl(origin, opts)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return res, err
@@ -90,11 +92,12 @@ func (c *Client) doGetRequest(url string, out any) (BaseResponse, error) {
 	return res, nil
 }
 
-func (c *Client) doPostRequest(url string, in any, out any) error {
+func (c *Client) doPostRequest(origin string, in any, out any) error {
 	if len(c.options.Token) == 0 {
 		return fmt.Errorf("token is required for post request")
 	}
 
+	url := c.buildUrl(origin, nil)
 	body, err := json.Marshal(in)
 	if err != nil {
 		return err
@@ -113,11 +116,52 @@ func (c *Client) doPostRequest(url string, in any, out any) error {
 	return nil
 }
 
-func (c *Client) doDeleteRequest(url string) error {
+func (c *Client) doPatchRequest(origin string, patch any) error {
+	if len(c.options.Token) == 0 {
+		return fmt.Errorf("token is required for put request")
+	}
+
+	var item any
+	_, err := c.doGetRequest(origin, nil, &item)
+	if err != nil {
+		return err
+	}
+
+	res, err := json.Marshal(patch)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(res, &item)
+	if err != nil {
+		return err
+	}
+
+	itemBytes, err := json.Marshal(item)
+	if err != nil {
+		return err
+	}
+
+	url := c.buildUrl(origin, nil)
+	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(itemBytes))
+	if err != nil {
+		return err
+	}
+
+	_, err = c.doRequest(req, http.StatusOK, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) doDeleteRequest(origin string) error {
 	if len(c.options.Token) == 0 {
 		return fmt.Errorf("token is required for delete request")
 	}
 
+	url := c.buildUrl(origin, nil)
 	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		return err
@@ -129,6 +173,57 @@ func (c *Client) doDeleteRequest(url string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) buildUrl(origin string, opts *listOptions) string {
+	newUrl := fmt.Sprintf("%s/%s/%s", c.options.Endpoint, c.options.Version, origin)
+
+	// No options to append
+	if opts == nil {
+		return newUrl
+	}
+
+	var params []string
+
+	for key, value := range opts.Filters {
+		if value != "" {
+			params = pushOrOverwrite(params, key, value)
+		}
+	}
+
+	if opts.Pageable.Page != 0 && opts.Pageable.Page != 1 {
+		params = pushOrOverwrite(params, "page", strconv.Itoa(opts.Pageable.Page))
+	}
+
+	if opts.Pageable.Size != 0 && opts.Pageable.Size != c.options.Size {
+		params = pushOrOverwrite(params, "size", strconv.Itoa(opts.Pageable.Size))
+	}
+
+	if opts.Pageable.Sort != "" {
+		sortParam := opts.Pageable.Sort
+		if opts.Pageable.Order != "" {
+			sortParam = fmt.Sprintf("%s,%s", sortParam, opts.Pageable.Order)
+		}
+		params = pushOrOverwrite(params, "sort", sortParam)
+	}
+
+	stringOfParams := ""
+	if len(params) > 0 {
+		stringOfParams = "?" + strings.Join(params, "&")
+	}
+
+	newUrl += stringOfParams
+	return newUrl
+}
+
+func pushOrOverwrite(params []string, key, value string) []string {
+	for i, param := range params {
+		if strings.HasPrefix(param, key+"=") {
+			params[i] = fmt.Sprintf("%s=%s", key, value)
+			return params
+		}
+	}
+	return append(params, fmt.Sprintf("%s=%s", key, value))
 }
 
 func extractHeaders(header http.Header) HeaderResponse {
