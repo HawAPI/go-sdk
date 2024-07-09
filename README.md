@@ -97,7 +97,8 @@ func main() {
     id, _ := uuid.Parse("<unknown uuid>")
     res, err := client.FindActor(id)
     if err != nil {
-        // If the error is coming from the API request, it'll be of type hawapi.ErrorResponse.
+        // If the error is coming from the API request, 
+        // it'll be of type hawapi.ErrorResponse.
         if resErr, ok := err.(hawapi.ErrorResponse); ok {
             fmt.Printf("API error %d Message: %s\n", resErr.Code, resErr.Message)
         } else {
