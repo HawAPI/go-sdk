@@ -6,3 +6,10 @@ type Pageable struct {
 	Sort  string `json:"sort"`
 	Order string `json:"order"`
 }
+
+var DefaultPageable = Pageable{
+	Page:  1,
+	Size:  DefaultSize,
+	Sort:  "",
+	Order: "ASC",
+}
