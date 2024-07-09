@@ -3,6 +3,7 @@ package hawapi
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -38,7 +39,7 @@ const (
 )
 
 func (c *Client) doRequest(req *http.Request, wantStatus int, out any) (http.Header, error) {
-	if r := reflect.ValueOf(out); r.Kind() != reflect.Ptr {
+	if r := reflect.ValueOf(out); out != nil && r.Kind() != reflect.Ptr {
 		return nil, fmt.Errorf("out must be a pointer")
 	}
 
@@ -51,6 +52,7 @@ func (c *Client) doRequest(req *http.Request, wantStatus int, out any) (http.Hea
 
 	res, err := c.client.Do(req)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	defer res.Body.Close()
@@ -61,8 +63,11 @@ func (c *Client) doRequest(req *http.Request, wantStatus int, out any) (http.Hea
 	}
 
 	if res.StatusCode != wantStatus {
-		fmt.Println(string(body))
-		return nil, fmt.Errorf("unexpected status: %s", res.Status)
+		var resErr ErrorResponse
+		if err := json.Unmarshal(body, &resErr); err != nil {
+			return nil, errors.New("failed to parse error message: " + err.Error())
+		}
+		return nil, resErr
 	}
 
 	if out != nil {
