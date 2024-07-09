@@ -12,7 +12,7 @@ type ListOptions func(*listOptions)
 // newListOptions wil create a new listOptions with default and pre-defined values.
 //
 // Values like 'page size' and 'language' are configured on Client initialization
-func (c *Client) newListOptions() *listOptions {
+func (c *Client) newListOptions() listOptions {
 	opts := listOptions{
 		Pageable: Pageable{
 			Page:  1,
@@ -23,11 +23,12 @@ func (c *Client) newListOptions() *listOptions {
 		Filters: make(Filters),
 	}
 
+	// Don't set language param if it's the same as default
 	if len(c.options.Language) != 0 && c.options.Language != DefaultLanguage {
 		opts.Filters["language"] = c.options.Language
 	}
 
-	return &opts
+	return opts
 }
 
 func WithFilters(filters Filters) ListOptions {

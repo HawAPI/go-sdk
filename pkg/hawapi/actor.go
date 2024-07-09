@@ -71,10 +71,10 @@ func (c *Client) ListActors(options ...ListOptions) (ActorListResponse, error) {
 
 	opts := c.newListOptions()
 	for _, opt := range options {
-		opt(opts)
+		opt(&opts)
 	}
 
-	doRes, err := c.doGetRequest(actorOrigin, opts, &actors)
+	doRes, err := c.doGetRequest(actorOrigin, &opts, &actors)
 	if err != nil {
 		return res, err
 	}
