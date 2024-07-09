@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -37,6 +38,10 @@ const (
 )
 
 func (c *Client) doRequest(req *http.Request, wantStatus int, out any) (http.Header, error) {
+	if r := reflect.ValueOf(out); r.Kind() != reflect.Ptr {
+		return nil, fmt.Errorf("out must be a pointer")
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	// Token is optional
