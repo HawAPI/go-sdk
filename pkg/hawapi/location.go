@@ -68,7 +68,8 @@ func (c *Client) FindLocation(id uuid.UUID) (LocationResponse, error) {
 	var location Location
 	var res LocationResponse
 
-	doRes, err := c.doGetRequest(locationOrigin+"/"+id.String(), nil, &location)
+	opts := c.newQueryOptions()
+	doRes, err := c.doGetRequest(locationOrigin+"/"+id.String(), &opts, &location)
 	if err != nil {
 		return res, err
 	}
@@ -85,7 +86,8 @@ func (c *Client) RandomLocation() (LocationResponse, error) {
 	var location Location
 	var res LocationResponse
 
-	doRes, err := c.doGetRequest(locationOrigin+"/random", nil, &location)
+	opts := c.newQueryOptions()
+	doRes, err := c.doGetRequest(locationOrigin+"/random", &opts, &location)
 	if err != nil {
 		return res, err
 	}

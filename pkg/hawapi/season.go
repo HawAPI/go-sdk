@@ -86,7 +86,8 @@ func (c *Client) FindSeason(id uuid.UUID) (SeasonResponse, error) {
 	var season Season
 	var res SeasonResponse
 
-	doRes, err := c.doGetRequest(seasonOrigin+"/"+id.String(), nil, &season)
+	opts := c.newQueryOptions()
+	doRes, err := c.doGetRequest(seasonOrigin+"/"+id.String(), &opts, &season)
 	if err != nil {
 		return res, err
 	}
@@ -103,7 +104,8 @@ func (c *Client) RandomSeason() (SeasonResponse, error) {
 	var season Season
 	var res SeasonResponse
 
-	doRes, err := c.doGetRequest(seasonOrigin+"/random", nil, &season)
+	opts := c.newQueryOptions()
+	doRes, err := c.doGetRequest(seasonOrigin+"/random", &opts, &season)
 	if err != nil {
 		return res, err
 	}

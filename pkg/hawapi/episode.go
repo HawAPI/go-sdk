@@ -78,7 +78,8 @@ func (c *Client) FindEpisode(id uuid.UUID) (EpisodeResponse, error) {
 	var episode Episode
 	var res EpisodeResponse
 
-	doRes, err := c.doGetRequest(episodeOrigin+"/"+id.String(), nil, &episode)
+	opts := c.newQueryOptions()
+	doRes, err := c.doGetRequest(episodeOrigin+"/"+id.String(), &opts, &episode)
 	if err != nil {
 		return res, err
 	}
@@ -95,7 +96,8 @@ func (c *Client) RandomEpisode() (EpisodeResponse, error) {
 	var episode Episode
 	var res EpisodeResponse
 
-	doRes, err := c.doGetRequest(episodeOrigin+"/random", nil, &episode)
+	opts := c.newQueryOptions()
+	doRes, err := c.doGetRequest(episodeOrigin+"/random", &opts, &episode)
 	if err != nil {
 		return res, err
 	}

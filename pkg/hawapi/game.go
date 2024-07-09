@@ -92,7 +92,8 @@ func (c *Client) FindGame(id uuid.UUID) (GameResponse, error) {
 	var game Game
 	var res GameResponse
 
-	doRes, err := c.doGetRequest(gameOrigin+"/"+id.String(), nil, &game)
+	opts := c.newQueryOptions()
+	doRes, err := c.doGetRequest(gameOrigin+"/"+id.String(), &opts, &game)
 	if err != nil {
 		return res, err
 	}
@@ -109,7 +110,8 @@ func (c *Client) RandomGame() (GameResponse, error) {
 	var game Game
 	var res GameResponse
 
-	doRes, err := c.doGetRequest(gameOrigin+"/random", nil, &game)
+	opts := c.newQueryOptions()
+	doRes, err := c.doGetRequest(gameOrigin+"/random", &opts, &game)
 	if err != nil {
 		return res, err
 	}
