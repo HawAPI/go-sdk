@@ -93,7 +93,7 @@ func (c *Client) RandomCharacter() (CharacterResponse, error) {
 	var character Character
 	var res CharacterResponse
 
-	doRes, err := c.doGetRequest(characterOrigin+"/random", nil, character)
+	doRes, err := c.doGetRequest(characterOrigin+"/random", nil, &character)
 	if err != nil {
 		return res, err
 	}

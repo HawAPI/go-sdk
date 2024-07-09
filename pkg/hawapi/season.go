@@ -119,7 +119,7 @@ func (c *Client) RandomSeason() (SeasonResponse, error) {
 func (c *Client) CreateSeason(s CreateSeason) (Season, error) {
 	var season Season
 
-	err := c.doPostRequest(seasonOrigin, s, season)
+	err := c.doPostRequest(seasonOrigin, s, &season)
 	if err != nil {
 		return season, err
 	}

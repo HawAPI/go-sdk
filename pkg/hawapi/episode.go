@@ -95,7 +95,7 @@ func (c *Client) RandomEpisode() (EpisodeResponse, error) {
 	var episode Episode
 	var res EpisodeResponse
 
-	doRes, err := c.doGetRequest(episodeOrigin+"/random", nil, episode)
+	doRes, err := c.doGetRequest(episodeOrigin+"/random", nil, &episode)
 	if err != nil {
 		return res, err
 	}

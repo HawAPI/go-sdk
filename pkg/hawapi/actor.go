@@ -107,7 +107,7 @@ func (c *Client) RandomActor() (ActorResponse, error) {
 	var actor Actor
 	var res ActorResponse
 
-	doRes, err := c.doGetRequest(actorOrigin+"/random", nil, actor)
+	doRes, err := c.doGetRequest(actorOrigin+"/random", nil, &actor)
 	if err != nil {
 		return res, err
 	}

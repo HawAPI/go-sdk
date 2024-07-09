@@ -109,7 +109,7 @@ func (c *Client) RandomGame() (GameResponse, error) {
 	var game Game
 	var res GameResponse
 
-	doRes, err := c.doGetRequest(gameOrigin+"/random", nil, game)
+	doRes, err := c.doGetRequest(gameOrigin+"/random", nil, &game)
 	if err != nil {
 		return res, err
 	}
