@@ -24,15 +24,15 @@ type Character struct {
 }
 
 type CreateCharacter struct {
-	Thumbnail string   `json:"thumbnail,omitempty"`
+	FirstName string   `json:"first_name,omitempty"`
+	LastName  string   `json:"last_name,omitempty"`
 	Nicknames []string `json:"nicknames,omitempty"`
 	Gender    int      `json:"gender,omitempty"`
 	Actor     string   `json:"actor,omitempty"`
-	Images    []string `json:"images,omitempty"`
-	FirstName string   `json:"first_name,omitempty"`
-	LastName  string   `json:"last_name,omitempty"`
 	BirthDate string   `json:"birth_date,omitempty"`
 	DeathDate string   `json:"death_date,omitempty"`
+	Thumbnail string   `json:"thumbnail,omitempty"`
+	Images    []string `json:"images,omitempty"`
 	Sources   []string `json:"sources,omitempty"`
 }
 
