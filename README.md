@@ -57,10 +57,10 @@ func main() {
   client := hawapi.NewClient()
   client.WithOpts(hawapi.Options{
     Endpoint: "http://localhost:8080/api",
-	// Version
-	// Language
-	// Token
-	// ...
+    // Version
+    // Language
+    // Token
+    // ...
   })
 }
 ```
