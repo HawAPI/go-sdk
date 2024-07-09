@@ -1,8 +1,6 @@
 package hawapi
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -31,8 +29,8 @@ type Actor struct {
 	Thumbnail   string    `json:"thumbnail,omitempty"`
 	Images      []string  `json:"images,omitempty"`
 	Sources     []string  `json:"sources,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   string    `json:"created_at"`
+	UpdatedAt   string    `json:"updated_at"`
 }
 
 type CreateActor struct {
