@@ -41,11 +41,11 @@ type LocationListResponse struct {
 }
 
 // ListLocations will get all locations
-func (c *Client) ListLocations(options ...ListOptions) (LocationListResponse, error) {
+func (c *Client) ListLocations(options ...QueryOptions) (LocationListResponse, error) {
 	var locations []Location
 	var res LocationListResponse
 
-	opts := c.newListOptions()
+	opts := c.newQueryOptions()
 	for _, opt := range options {
 		opt(&opts)
 	}

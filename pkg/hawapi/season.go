@@ -59,11 +59,11 @@ type SeasonListResponse struct {
 }
 
 // ListSeasons will get all seasons
-func (c *Client) ListSeasons(options ...ListOptions) (SeasonListResponse, error) {
+func (c *Client) ListSeasons(options ...QueryOptions) (SeasonListResponse, error) {
 	var seasons []Season
 	var res SeasonListResponse
 
-	opts := c.newListOptions()
+	opts := c.newQueryOptions()
 	for _, opt := range options {
 		opt(&opts)
 	}

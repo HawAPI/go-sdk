@@ -51,11 +51,11 @@ type EpisodeListResponse struct {
 }
 
 // ListEpisodes will get all episodes
-func (c *Client) ListEpisodes(options ...ListOptions) (EpisodeListResponse, error) {
+func (c *Client) ListEpisodes(options ...QueryOptions) (EpisodeListResponse, error) {
 	var episodes []Episode
 	var res EpisodeListResponse
 
-	opts := c.newListOptions()
+	opts := c.newQueryOptions()
 	for _, opt := range options {
 		opt(&opts)
 	}

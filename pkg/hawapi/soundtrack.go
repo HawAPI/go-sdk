@@ -47,11 +47,11 @@ type SoundtrackListResponse struct {
 }
 
 // ListSoundtracks will get all soundtracks
-func (c *Client) ListSoundtracks(options ...ListOptions) (SoundtrackListResponse, error) {
+func (c *Client) ListSoundtracks(options ...QueryOptions) (SoundtrackListResponse, error) {
 	var soundtracks []Soundtrack
 	var res SoundtrackListResponse
 
-	opts := c.newListOptions()
+	opts := c.newQueryOptions()
 	for _, opt := range options {
 		opt(&opts)
 	}

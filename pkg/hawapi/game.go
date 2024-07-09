@@ -65,11 +65,11 @@ type GameListResponse struct {
 }
 
 // ListGames will get all games
-func (c *Client) ListGames(options ...ListOptions) (GameListResponse, error) {
+func (c *Client) ListGames(options ...QueryOptions) (GameListResponse, error) {
 	var games []Game
 	var res GameListResponse
 
-	opts := c.newListOptions()
+	opts := c.newQueryOptions()
 	for _, opt := range options {
 		opt(&opts)
 	}

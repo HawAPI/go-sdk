@@ -49,11 +49,11 @@ type CharacterListResponse struct {
 }
 
 // ListCharacters will get all characters
-func (c *Client) ListCharacters(options ...ListOptions) (CharacterListResponse, error) {
+func (c *Client) ListCharacters(options ...QueryOptions) (CharacterListResponse, error) {
 	var characters []Character
 	var res CharacterListResponse
 
-	opts := c.newListOptions()
+	opts := c.newQueryOptions()
 	for _, opt := range options {
 		opt(&opts)
 	}

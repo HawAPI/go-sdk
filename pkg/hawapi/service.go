@@ -79,7 +79,7 @@ func (c *Client) doRequest(req *http.Request, wantStatus int, out any) (http.Hea
 	return res.Header, nil
 }
 
-func (c *Client) doGetRequest(origin string, opts *listOptions, out any) (BaseResponse, error) {
+func (c *Client) doGetRequest(origin string, opts *queryOptions, out any) (BaseResponse, error) {
 	var res BaseResponse
 
 	url := c.buildUrl(origin, opts)
@@ -185,7 +185,7 @@ func (c *Client) doDeleteRequest(origin string) error {
 	return nil
 }
 
-func (c *Client) buildUrl(origin string, opts *listOptions) string {
+func (c *Client) buildUrl(origin string, opts *queryOptions) string {
 	newUrl := fmt.Sprintf("%s/%s/%s", c.options.Endpoint, c.options.Version, origin)
 
 	// No options to append

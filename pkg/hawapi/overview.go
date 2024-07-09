@@ -25,10 +25,10 @@ type Overview struct {
 	DataCount   DataCount `json:"data_count"`
 }
 
-func (c *Client) Overview(options ...ListOptions) (Overview, error) {
+func (c *Client) Overview(options ...QueryOptions) (Overview, error) {
 	var overview Overview
 
-	opts := c.newListOptions()
+	opts := c.newQueryOptions()
 	for _, opt := range options {
 		opt(&opts)
 	}

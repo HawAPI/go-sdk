@@ -63,11 +63,11 @@ type ActorListResponse struct {
 }
 
 // ListActors will get all actors
-func (c *Client) ListActors(options ...ListOptions) (ActorListResponse, error) {
+func (c *Client) ListActors(options ...QueryOptions) (ActorListResponse, error) {
 	var actors []Actor
 	var res ActorListResponse
 
-	opts := c.newListOptions()
+	opts := c.newQueryOptions()
 	for _, opt := range options {
 		opt(&opts)
 	}
