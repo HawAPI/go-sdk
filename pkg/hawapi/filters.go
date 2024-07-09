@@ -9,6 +9,13 @@ type listOptions struct {
 
 type ListOptions func(*listOptions)
 
+func NewListOptions(pageable Pageable, filters Filters) ListOptions {
+	return func(o *listOptions) {
+		o.Pageable = pageable
+		o.Filters = filters
+	}
+}
+
 // newListOptions wil create a new listOptions with default and pre-defined values.
 //
 // Values like 'page size' and 'language' are configured on Client initialization
