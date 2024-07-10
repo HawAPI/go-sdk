@@ -23,16 +23,11 @@ func (c *Client) newQueryOptions() queryOptions {
 	opts := queryOptions{
 		Pageable: Pageable{
 			Page:  1,
-			Size:  c.options.Size,
+			Size:  DefaultSize,
 			Sort:  "",
 			Order: "ASC",
 		},
 		Filters: make(Filters),
-	}
-
-	// Don't set language param if it's the same as default
-	if len(c.options.Language) != 0 && c.options.Language != DefaultLanguage {
-		opts.Filters["language"] = c.options.Language
 	}
 
 	return opts
