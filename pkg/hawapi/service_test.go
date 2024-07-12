@@ -1,6 +1,9 @@
 package hawapi
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -123,6 +126,118 @@ func TestClient_buildUrl(t *testing.T) {
 
 			if got := c.buildUrl(tt.args.origin, tt.args.query); got != tt.want {
 				t.Errorf("buildUrl() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_extractHeaders(t *testing.T) {
+	type args struct {
+		header http.Header
+	}
+	tests := []struct {
+		name string
+		args args
+		want HeaderResponse
+	}{
+		{
+			name: "test",
+			args: args{
+				header: http.Header{
+					apiHeaderRateLimitRemaining: []string{"15"},
+					apiHeaderContentLanguage:    []string{"fr-FR"},
+					apiHeaderContentLength:      []string{"123"},
+					apiHeaderItemTotal:          []string{"10"},
+					apiHeaderPageIndex:          []string{"1"},
+					apiHeaderPageSize:           []string{"10"},
+					apiHeaderPageTotal:          []string{"1"},
+				},
+			},
+			want: HeaderResponse{
+				Quota:     Quota{Remaining: 15},
+				Language:  "fr-FR",
+				Length:    123,
+				ItemSize:  10,
+				Page:      1,
+				PageSize:  10,
+				PageTotal: 1,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := extractHeaders(tt.args.header); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("extractHeaders() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestClient_doRequest(t *testing.T) {
+	type fields struct {
+		options Options
+	}
+	type args struct {
+		reqMethod  string
+		mockStatus int
+		wantStatus int
+		out        any
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name:   "should do request successfully",
+			fields: fields{},
+			args: args{
+				reqMethod:  "GET",
+				mockStatus: http.StatusOK,
+				wantStatus: http.StatusOK,
+				out:        nil,
+			},
+			wantErr: false,
+		},
+		{
+			name:   "should return error if status is not as expected",
+			fields: fields{},
+			args: args{
+				reqMethod:  "GET",
+				mockStatus: http.StatusInternalServerError,
+				wantStatus: http.StatusOK,
+			},
+			wantErr: true,
+		},
+		{
+			name:   "should return error if out is not a pointer",
+			fields: fields{},
+			args: args{
+				reqMethod: "GET",
+				out:       Actor{},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewClientWithOpts(tt.fields.options)
+
+			sv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.args.mockStatus)
+			}))
+			defer sv.Close()
+
+			req, err := http.NewRequest(tt.args.reqMethod, sv.URL, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = c.doRequest(req, tt.args.wantStatus, tt.args.out)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("doRequest() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
 		})
 	}
