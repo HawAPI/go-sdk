@@ -53,12 +53,7 @@ func (c *Client) ListCharacters(options ...QueryOptions) (CharacterListResponse,
 	var characters []Character
 	var res CharacterListResponse
 
-	opts := c.newQueryOptions()
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	doRes, err := c.doGetRequest(characterOrigin, &opts, &characters)
+	doRes, err := c.doGetRequest(characterOrigin, options, &characters)
 	if err != nil {
 		return res, err
 	}

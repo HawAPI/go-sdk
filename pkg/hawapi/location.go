@@ -45,12 +45,7 @@ func (c *Client) ListLocations(options ...QueryOptions) (LocationListResponse, e
 	var locations []Location
 	var res LocationListResponse
 
-	opts := c.newQueryOptions()
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	doRes, err := c.doGetRequest(locationOrigin, &opts, &locations)
+	doRes, err := c.doGetRequest(locationOrigin, options, &locations)
 	if err != nil {
 		return res, err
 	}
@@ -68,8 +63,7 @@ func (c *Client) FindLocation(id uuid.UUID) (LocationResponse, error) {
 	var location Location
 	var res LocationResponse
 
-	opts := c.newQueryOptions()
-	doRes, err := c.doGetRequest(locationOrigin+"/"+id.String(), &opts, &location)
+	doRes, err := c.doGetRequest(locationOrigin+"/"+id.String(), nil, &location)
 	if err != nil {
 		return res, err
 	}
@@ -86,8 +80,7 @@ func (c *Client) RandomLocation() (LocationResponse, error) {
 	var location Location
 	var res LocationResponse
 
-	opts := c.newQueryOptions()
-	doRes, err := c.doGetRequest(locationOrigin+"/random", &opts, &location)
+	doRes, err := c.doGetRequest(locationOrigin+"/random", nil, &location)
 	if err != nil {
 		return res, err
 	}

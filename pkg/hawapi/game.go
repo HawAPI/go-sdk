@@ -69,12 +69,7 @@ func (c *Client) ListGames(options ...QueryOptions) (GameListResponse, error) {
 	var games []Game
 	var res GameListResponse
 
-	opts := c.newQueryOptions()
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	doRes, err := c.doGetRequest(gameOrigin, &opts, &games)
+	doRes, err := c.doGetRequest(gameOrigin, options, &games)
 	if err != nil {
 		return res, err
 	}
@@ -92,8 +87,7 @@ func (c *Client) FindGame(id uuid.UUID) (GameResponse, error) {
 	var game Game
 	var res GameResponse
 
-	opts := c.newQueryOptions()
-	doRes, err := c.doGetRequest(gameOrigin+"/"+id.String(), &opts, &game)
+	doRes, err := c.doGetRequest(gameOrigin+"/"+id.String(), nil, &game)
 	if err != nil {
 		return res, err
 	}
@@ -110,8 +104,7 @@ func (c *Client) RandomGame() (GameResponse, error) {
 	var game Game
 	var res GameResponse
 
-	opts := c.newQueryOptions()
-	doRes, err := c.doGetRequest(gameOrigin+"/random", &opts, &game)
+	doRes, err := c.doGetRequest(gameOrigin+"/random", nil, &game)
 	if err != nil {
 		return res, err
 	}

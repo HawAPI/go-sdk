@@ -51,12 +51,7 @@ func (c *Client) ListSoundtracks(options ...QueryOptions) (SoundtrackListRespons
 	var soundtracks []Soundtrack
 	var res SoundtrackListResponse
 
-	opts := c.newQueryOptions()
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	doRes, err := c.doGetRequest(soundtrackOrigin, &opts, &soundtracks)
+	doRes, err := c.doGetRequest(soundtrackOrigin, options, &soundtracks)
 	if err != nil {
 		return res, err
 	}

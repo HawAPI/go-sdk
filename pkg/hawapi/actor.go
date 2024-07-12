@@ -67,12 +67,7 @@ func (c *Client) ListActors(options ...QueryOptions) (ActorListResponse, error) 
 	var actors []Actor
 	var res ActorListResponse
 
-	opts := c.newQueryOptions()
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	doRes, err := c.doGetRequest(actorOrigin, &opts, &actors)
+	doRes, err := c.doGetRequest(actorOrigin, options, &actors)
 	if err != nil {
 		return res, err
 	}

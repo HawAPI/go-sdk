@@ -79,10 +79,15 @@ func (c *Client) doRequest(req *http.Request, wantStatus int, out any) (http.Hea
 	return res.Header, nil
 }
 
-func (c *Client) doGetRequest(origin string, opts *queryOptions, out any) (BaseResponse, error) {
+func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (BaseResponse, error) {
 	var res BaseResponse
 
-	url := c.buildUrl(origin, opts)
+	// This will fix 'buildUrl' ignoring url options if 'query' is nil
+	if query == nil {
+		query = []QueryOptions{}
+	}
+
+	url := c.buildUrl(origin, query)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return res, err
@@ -185,15 +190,30 @@ func (c *Client) doDeleteRequest(origin string) error {
 	return nil
 }
 
-func (c *Client) buildUrl(origin string, opts *queryOptions) string {
-	newUrl := fmt.Sprintf("%s/%s/%s", c.options.Endpoint, c.options.Version, origin)
+func (c *Client) buildUrl(origin string, query []QueryOptions) string {
+	url := fmt.Sprintf("%s/%s/%s", c.options.Endpoint, c.options.Version, origin)
 
 	// No options to append
-	if opts == nil {
-		return newUrl
+	if query == nil {
+		return url
 	}
 
 	var params []string
+
+	// Don't set language param if it's the same as default
+	if len(c.options.Language) != 0 && c.options.Language != DefaultLanguage {
+		params = pushOrOverwrite(params, "language", c.options.Language)
+	}
+
+	// Don't set size param if it's the same as default
+	if c.options.Size != 0 && c.options.Size != DefaultSize {
+		params = pushOrOverwrite(params, "size", strconv.Itoa(c.options.Size))
+	}
+
+	opts := c.newQueryOptions()
+	for _, opt := range query {
+		opt(&opts)
+	}
 
 	for key, value := range opts.Filters {
 		if value != "" {
@@ -205,7 +225,7 @@ func (c *Client) buildUrl(origin string, opts *queryOptions) string {
 		params = pushOrOverwrite(params, "page", strconv.Itoa(opts.Pageable.Page))
 	}
 
-	if opts.Pageable.Size != 0 && opts.Pageable.Size != c.options.Size {
+	if opts.Pageable.Size != 0 && opts.Pageable.Size != DefaultSize {
 		params = pushOrOverwrite(params, "size", strconv.Itoa(opts.Pageable.Size))
 	}
 
@@ -217,13 +237,13 @@ func (c *Client) buildUrl(origin string, opts *queryOptions) string {
 		params = pushOrOverwrite(params, "sort", sortParam)
 	}
 
-	stringOfParams := ""
+	paramsStr := ""
 	if len(params) > 0 {
-		stringOfParams = "?" + strings.Join(params, "&")
+		paramsStr = "?" + strings.Join(params, "&")
 	}
 
-	newUrl += stringOfParams
-	return newUrl
+	url += paramsStr
+	return url
 }
 
 func pushOrOverwrite(params []string, key, value string) []string {

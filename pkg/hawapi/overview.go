@@ -28,12 +28,7 @@ type Overview struct {
 func (c *Client) Overview(options ...QueryOptions) (Overview, error) {
 	var overview Overview
 
-	opts := c.newQueryOptions()
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	_, err := c.doGetRequest("overview", &opts, &overview)
+	_, err := c.doGetRequest("overview", options, &overview)
 	if err != nil {
 		return overview, err
 	}

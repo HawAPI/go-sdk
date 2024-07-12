@@ -63,12 +63,7 @@ func (c *Client) ListSeasons(options ...QueryOptions) (SeasonListResponse, error
 	var seasons []Season
 	var res SeasonListResponse
 
-	opts := c.newQueryOptions()
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	doRes, err := c.doGetRequest(seasonOrigin, &opts, &seasons)
+	doRes, err := c.doGetRequest(seasonOrigin, options, &seasons)
 	if err != nil {
 		return res, err
 	}
@@ -86,8 +81,7 @@ func (c *Client) FindSeason(id uuid.UUID) (SeasonResponse, error) {
 	var season Season
 	var res SeasonResponse
 
-	opts := c.newQueryOptions()
-	doRes, err := c.doGetRequest(seasonOrigin+"/"+id.String(), &opts, &season)
+	doRes, err := c.doGetRequest(seasonOrigin+"/"+id.String(), nil, &season)
 	if err != nil {
 		return res, err
 	}
@@ -104,8 +98,7 @@ func (c *Client) RandomSeason() (SeasonResponse, error) {
 	var season Season
 	var res SeasonResponse
 
-	opts := c.newQueryOptions()
-	doRes, err := c.doGetRequest(seasonOrigin+"/random", &opts, &season)
+	doRes, err := c.doGetRequest(seasonOrigin+"/random", nil, &season)
 	if err != nil {
 		return res, err
 	}
