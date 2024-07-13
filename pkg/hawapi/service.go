@@ -277,9 +277,33 @@ func extractHeaders(header http.Header) HeaderResponse {
 	lengthStr := header.Get(apiHeaderContentLength)
 	headers.Length = parseInt(lengthStr)
 
+	nextPage := handlePagination(headers.Page, true)
+	headers.NextPage = nextPage
+
+	prevPage := handlePagination(headers.Page, false)
+	headers.PrevPage = prevPage
+
 	headers.Etag = header.Get(apiHeaderEtag)
 	headers.Language = header.Get(apiHeaderContentLanguage)
 	return headers
+}
+
+func handlePagination(page int, increase bool) int {
+	if page <= 0 {
+		return -1
+	}
+
+	if increase {
+		page++
+	} else {
+		page--
+	}
+
+	if page == 0 {
+		return -1
+	}
+
+	return page
 }
 
 func parseInt(s string) int {

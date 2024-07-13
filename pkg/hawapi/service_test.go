@@ -242,3 +242,71 @@ func TestClient_doRequest(t *testing.T) {
 		})
 	}
 }
+
+func Test_handlePagination(t *testing.T) {
+	type args struct {
+		page     int
+		increase bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "should return -1 with page value being 0 (decrease)",
+			args: args{
+				page:     0,
+				increase: false,
+			},
+			want: -1,
+		},
+		{
+			name: "should return -1 with page value being 0 (increase)",
+			args: args{
+				page:     0,
+				increase: true,
+			},
+			want: -1,
+		},
+		{
+			name: "should return -1 with page value being -1 (decrease)",
+			args: args{
+				page:     -1,
+				increase: false,
+			},
+			want: -1,
+		},
+		{
+			name: "should return 1 with page value being 2 (decrease)",
+			args: args{
+				page:     2,
+				increase: false,
+			},
+			want: 1,
+		},
+		{
+			name: "should return -1 with page value being 1 (decrease)",
+			args: args{
+				page:     1,
+				increase: false,
+			},
+			want: -1,
+		},
+		{
+			name: "should return 2 with page value being 1 (increase)",
+			args: args{
+				page:     1,
+				increase: true,
+			},
+			want: 2,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := handlePagination(tt.args.page, tt.args.increase); got != tt.want {
+				t.Errorf("handlePagination() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
