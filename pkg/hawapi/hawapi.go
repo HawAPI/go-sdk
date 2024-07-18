@@ -1,13 +1,16 @@
 package hawapi
 
 import (
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/HawAPI/go-sdk/pkg/cache"
 )
 
 const (
+	DefaultLogLevel         = slog.LevelWarn
 	DefaultEndpoint         = "https://hawapi.theproject.id/api"
 	DefaultVersion          = "v1"
 	DefaultLanguage         = "en-US"
@@ -24,6 +27,8 @@ var DefaultOptions = Options{
 	Size:             DefaultSize,
 	Timeout:          DefaultTimeout,
 	UseInMemoryCache: DefaultUseInMemoryCache,
+	LogLevel:         DefaultLogLevel,
+	LogHandler:       nil,
 }
 
 type Options struct {
@@ -55,6 +60,16 @@ type Options struct {
 
 	// Define if the package should save (in-memory) all request results
 	UseInMemoryCache bool
+
+	// Define the level of SDK logging
+	//
+	// NOTE: If you are using a custom LogHandler, use slog.HandlerOptions to define a new log level or the SDK will panic
+	LogLevel slog.Level
+
+	// Defines the log handler.
+	//
+	// If set to nil, it defaults to NewFormattedHandler
+	LogHandler slog.Handler
 }
 
 // Client is the [HawAPI] golang client.
@@ -68,6 +83,7 @@ type Options struct {
 type Client struct {
 	options Options
 	client  *http.Client
+	logger  *slog.Logger
 	cache   cache.Cache
 }
 
@@ -78,6 +94,10 @@ func NewClient() Client {
 	c.client = &http.Client{
 		Timeout: time.Duration(c.options.Timeout) * time.Second,
 	}
+
+	c.logger = slog.New(NewFormattedHandler(os.Stdout, &slog.HandlerOptions{
+		Level: c.options.LogLevel,
+	}))
 
 	c.cache = cache.NewMemoryCache()
 	return c
@@ -110,6 +130,22 @@ func (c *Client) WithOpts(options Options) {
 
 	if options.Timeout != 0 {
 		c.options.Timeout = options.Timeout
+	}
+
+	if options.LogLevel != slog.LevelInfo {
+		c.options.LogLevel = options.LogLevel
+
+		if options.LogHandler != nil {
+			panic("when defining log handler, use slog.HandlerOptions instead")
+		}
+
+		c.logger = slog.New(NewFormattedHandler(os.Stdout, &slog.HandlerOptions{
+			Level: options.LogLevel,
+		}))
+	}
+
+	if options.LogHandler != nil {
+		c.logger = slog.New(options.LogHandler)
 	}
 
 	c.options.UseInMemoryCache = options.UseInMemoryCache
