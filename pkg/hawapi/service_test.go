@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/HawAPI/go-sdk/pkg/cache"
 )
 
 func TestClient_buildUrl(t *testing.T) {
@@ -161,6 +163,8 @@ func Test_extractHeaders(t *testing.T) {
 				Page:      1,
 				PageSize:  10,
 				PageTotal: 1,
+				NextPage:  2,
+				PrevPage:  -1,
 			},
 		},
 	}
@@ -306,6 +310,93 @@ func Test_handlePagination(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := handlePagination(tt.args.page, tt.args.increase); got != tt.want {
 				t.Errorf("handlePagination() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestClient_doGetRequest(t *testing.T) {
+	type fields struct {
+		options Options
+		cache   cache.Cache
+	}
+	type args struct {
+		origin string
+		query  []QueryOptions
+		out    any
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    BaseResponse
+		wantErr bool
+	}{
+		{
+			name: "should call get request successfully",
+			fields: fields{
+				options: DefaultOptions,
+				cache:   cache.NewMemoryCache(),
+			},
+			args: args{
+				origin: "actors",
+				out:    &Actor{},
+			},
+			want: BaseResponse{
+				HeaderResponse: HeaderResponse{
+					Page:      -1,
+					PageSize:  -1,
+					PageTotal: -1,
+					ItemSize:  -1,
+					NextPage:  -1,
+					PrevPage:  -1,
+					Language:  "",
+					Quota: Quota{
+						Remaining: -1,
+					},
+					Etag:   "",
+					Length: 45,
+				},
+				Cached: true,
+				Status: 200,
+			},
+			wantErr: false,
+		},
+		{
+			name: "should return error if out is not a pointer",
+			fields: fields{
+				options: DefaultOptions,
+				cache:   cache.NewMemoryCache(),
+			},
+			args: args{
+				origin: "actors",
+				out:    Actor{},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				w.Write([]byte(`{"first_name": "Lorem", "last_name": "Ipsum"}`))
+			}))
+			defer server.Close()
+
+			tt.fields.options.Endpoint = server.URL
+			c := &Client{
+				options: tt.fields.options,
+				client:  server.Client(),
+				cache:   tt.fields.cache,
+			}
+
+			got, err := c.doGetRequest(tt.args.origin, tt.args.query, tt.args.out)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("doGetRequest() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("doGetRequest() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
