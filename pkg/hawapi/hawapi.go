@@ -73,19 +73,20 @@ type Client struct {
 
 // NewClient creates a new HawAPI client using the default options.
 func NewClient() Client {
-	return NewClientWithOpts(DefaultOptions)
+	c := Client{options: DefaultOptions}
+
+	c.client = &http.Client{
+		Timeout: time.Duration(c.options.Timeout) * time.Second,
+	}
+
+	c.cache = cache.NewMemoryCache()
+	return c
 }
 
 // NewClientWithOpts creates a new HawAPI client using custom options.
 func NewClientWithOpts(options Options) Client {
-	c := Client{}
+	c := NewClient()
 	c.WithOpts(options)
-
-	c.client = &http.Client{
-		Timeout: time.Duration(options.Timeout) * time.Second,
-	}
-
-	c.cache = cache.NewMemoryCache()
 	return c
 }
 
