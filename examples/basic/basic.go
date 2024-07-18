@@ -7,16 +7,22 @@ import (
 )
 
 func main() {
+	// Create a new client with default options
 	client := hawapi.NewClient()
+
+	// Override options
 	client.WithOpts(hawapi.Options{
 		Endpoint: "http://localhost:8080/api",
+		// When using 'WithOpts' or 'NewClientWithOpts' the value of
+		// 'UseInMemoryCache' will be set to false
+		UseInMemoryCache: true,
 	})
 
 	res, err := client.ListActors()
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 
 	fmt.Println(res)
+	fmt.Println(len(res.Data))
 }
