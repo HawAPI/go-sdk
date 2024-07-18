@@ -99,7 +99,7 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 
 		// If the cache doesn't work, we fetch the data again
 		if err := json.Unmarshal(cbr.data, out); err == nil {
-			c.logger.Info(fmt.Sprintf("found cached response for key %s", url))
+			c.logger.Debug(fmt.Sprintf("found cached response for key %s", url))
 			return cbr.BaseResponse, nil
 		}
 
@@ -135,7 +135,7 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 			data:         bOut,
 		}
 
-		c.logger.Info(fmt.Sprintf("cached response using '%s' as key", url))
+		c.logger.Debug(fmt.Sprintf("cached response using '%s' as key", url))
 		c.cache.Set(url, cbr)
 	}
 
@@ -230,7 +230,7 @@ func (c *Client) buildUrl(origin string, query []QueryOptions) string {
 
 	// No options to append
 	if query == nil {
-		c.logger.Info("building url without query options")
+		c.logger.Debug("building url without query options")
 		return url
 	}
 
@@ -279,7 +279,7 @@ func (c *Client) buildUrl(origin string, query []QueryOptions) string {
 	}
 
 	url += paramsStr
-	c.logger.Info("final url: " + url)
+	c.logger.Debug("final url: " + url)
 	return url
 }
 
@@ -350,7 +350,7 @@ func (c *Client) parseInt(s string) int {
 
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		c.logger.Info(fmt.Sprintf("failed to parse integer: %s", s))
+		c.logger.Debug(fmt.Sprintf("failed to parse integer: %s", s))
 		return -1
 	}
 
