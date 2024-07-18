@@ -148,6 +148,10 @@ func (c *Client) WithOpts(options Options) {
 		c.logger = slog.New(options.LogHandler)
 	}
 
+	if !options.UseInMemoryCache {
+		c.logger.Warn("Using WithOpts method, the value of UseInMemoryCache will be set to false")
+	}
+
 	c.options.UseInMemoryCache = options.UseInMemoryCache
 }
 
