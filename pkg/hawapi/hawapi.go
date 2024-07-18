@@ -91,27 +91,27 @@ func NewClientWithOpts(options Options) Client {
 
 // WithOpts will set or override current client options
 func (c *Client) WithOpts(options Options) {
-	if len(options.Endpoint) == 0 {
-		options.Endpoint = DefaultEndpoint
+	if len(options.Endpoint) != 0 {
+		c.options.Endpoint = options.Endpoint
 	}
 
-	if len(options.Version) == 0 {
-		options.Version = DefaultVersion
+	if len(options.Version) != 0 {
+		c.options.Version = options.Version
 	}
 
-	if len(options.Language) == 0 {
-		options.Language = DefaultLanguage
+	if len(options.Language) != 0 {
+		c.options.Language = options.Language
 	}
 
-	if options.Size == 0 {
-		options.Size = DefaultSize
+	if options.Size != 0 {
+		c.options.Size = options.Size
 	}
 
-	if options.Timeout == 0 {
-		options.Timeout = DefaultTimeout
+	if options.Timeout != 0 {
+		c.options.Timeout = options.Timeout
 	}
 
-	c.options = options
+	c.options.UseInMemoryCache = options.UseInMemoryCache
 }
 
 // ClearCache deletes all values from the cache and returns the count of deleted items
