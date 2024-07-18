@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -58,7 +57,6 @@ func (c *Client) doRequest(req *http.Request, wantStatus int, out any) (http.Hea
 
 	res, err := c.client.Do(req)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	defer res.Body.Close()
@@ -101,10 +99,11 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 
 		// If the cache doesn't work, we fetch the data again
 		if err := json.Unmarshal(cbr.data, out); err == nil {
+			c.logger.Info(fmt.Sprintf("found cached response for key %s", url))
 			return cbr.BaseResponse, nil
 		}
 
-		slog.Error("failed to parse response from in-memory cache, fetching...")
+		c.logger.Warn("failed to parse response from in-memory cache, fetching...")
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -117,7 +116,7 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 		return res, err
 	}
 
-	headers := extractHeaders(httpHeader)
+	headers := c.extractHeaders(httpHeader)
 	res = BaseResponse{
 		HeaderResponse: headers,
 		Status:         http.StatusOK,
@@ -136,6 +135,7 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 			data:         bOut,
 		}
 
+		c.logger.Info(fmt.Sprintf("cached response using '%s' as key", url))
 		c.cache.Set(url, cbr)
 	}
 
@@ -230,6 +230,7 @@ func (c *Client) buildUrl(origin string, query []QueryOptions) string {
 
 	// No options to append
 	if query == nil {
+		c.logger.Info("building url without query options")
 		return url
 	}
 
@@ -278,6 +279,7 @@ func (c *Client) buildUrl(origin string, query []QueryOptions) string {
 	}
 
 	url += paramsStr
+	c.logger.Info("final url: " + url)
 	return url
 }
 
@@ -291,31 +293,31 @@ func pushOrOverwrite(params []string, key, value string) []string {
 	return append(params, fmt.Sprintf("%s=%s", key, value))
 }
 
-func extractHeaders(header http.Header) HeaderResponse {
+func (c *Client) extractHeaders(header http.Header) HeaderResponse {
 	var headers HeaderResponse
 
 	rateLimitRemaining := header.Get(apiHeaderRateLimitRemaining)
-	headers.Quota.Remaining = parseInt(rateLimitRemaining)
+	headers.Quota.Remaining = c.parseInt(rateLimitRemaining)
 
 	pageStr := header.Get(apiHeaderPageIndex)
-	headers.Page = parseInt(pageStr)
+	headers.Page = c.parseInt(pageStr)
 
 	pageSizeStr := header.Get(apiHeaderPageSize)
-	headers.PageSize = parseInt(pageSizeStr)
+	headers.PageSize = c.parseInt(pageSizeStr)
 
 	pageTotalStr := header.Get(apiHeaderPageTotal)
-	headers.PageTotal = parseInt(pageTotalStr)
+	headers.PageTotal = c.parseInt(pageTotalStr)
 
 	itemStr := header.Get(apiHeaderItemTotal)
-	headers.ItemSize = parseInt(itemStr)
+	headers.ItemSize = c.parseInt(itemStr)
 
 	lengthStr := header.Get(apiHeaderContentLength)
-	headers.Length = parseInt(lengthStr)
+	headers.Length = c.parseInt(lengthStr)
 
-	nextPage := handlePagination(headers.Page, true)
+	nextPage := c.handlePagination(headers.Page, true)
 	headers.NextPage = nextPage
 
-	prevPage := handlePagination(headers.Page, false)
+	prevPage := c.handlePagination(headers.Page, false)
 	headers.PrevPage = prevPage
 
 	headers.Etag = header.Get(apiHeaderEtag)
@@ -323,7 +325,7 @@ func extractHeaders(header http.Header) HeaderResponse {
 	return headers
 }
 
-func handlePagination(page int, increase bool) int {
+func (c *Client) handlePagination(page int, increase bool) int {
 	if page <= 0 {
 		return -1
 	}
@@ -341,13 +343,14 @@ func handlePagination(page int, increase bool) int {
 	return page
 }
 
-func parseInt(s string) int {
+func (c *Client) parseInt(s string) int {
 	if len(s) == 0 {
 		return -1
 	}
 
 	i, err := strconv.Atoi(s)
 	if err != nil {
+		c.logger.Info(fmt.Sprintf("failed to parse integer: %s", s))
 		return -1
 	}
 
