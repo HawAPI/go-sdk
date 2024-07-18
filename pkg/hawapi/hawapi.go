@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DefaultLogLevel         = slog.LevelWarn
+	DefaultLogLevel         = slog.LevelInfo
 	DefaultEndpoint         = "https://hawapi.theproject.id/api"
 	DefaultVersion          = "v1"
 	DefaultLanguage         = "en-US"
@@ -132,7 +132,7 @@ func (c *Client) WithOpts(options Options) {
 		c.options.Timeout = options.Timeout
 	}
 
-	if options.LogLevel != slog.LevelInfo {
+	if options.LogLevel != DefaultLogLevel {
 		c.options.LogLevel = options.LogLevel
 
 		if options.LogHandler != nil {
