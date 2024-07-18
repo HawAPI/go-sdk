@@ -14,7 +14,6 @@ type HeaderResponse struct {
 	NextPage  int    `json:"next_page,omitempty"`
 	PrevPage  int    `json:"prev_page,omitempty"`
 	Language  string `json:"language,omitempty"`
-	Status    int    `json:"status"`
 	Quota     Quota  `json:"quota"`
 	Etag      string `json:"etag"`
 	Length    int    `json:"length"`
@@ -24,4 +23,5 @@ type HeaderResponse struct {
 type BaseResponse struct {
 	HeaderResponse
 	Cached bool `json:"cached,omitempty"`
+	Status int  `json:"status"`
 }
