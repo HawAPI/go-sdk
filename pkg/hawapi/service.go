@@ -120,6 +120,7 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 	headers := extractHeaders(httpHeader)
 	res = BaseResponse{
 		HeaderResponse: headers,
+		Status:         http.StatusOK,
 	}
 
 	if c.options.UseInMemoryCache {
