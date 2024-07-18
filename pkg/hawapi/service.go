@@ -6,11 +6,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
 )
+
+type cachedBaseResponse struct {
+	BaseResponse
+	data []byte
+}
 
 const (
 	// ApiHeaderRateLimitRemaining is the API rate limit remaining
@@ -88,6 +94,19 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 	}
 
 	url := c.buildUrl(origin, query)
+
+	cached, ok := c.cache.Get(url)
+	if ok {
+		cbr := cached.(cachedBaseResponse)
+
+		// If the cache doesn't work, we fetch the data again
+		if err := json.Unmarshal(cbr.data, out); err == nil {
+			return cbr.BaseResponse, nil
+		}
+
+		slog.Error("failed to parse response from in-memory cache, fetching...")
+	}
+
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return res, err
@@ -101,7 +120,22 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 	headers := extractHeaders(httpHeader)
 	res = BaseResponse{
 		HeaderResponse: headers,
-		Cached:         false,
+	}
+
+	if c.options.UseInMemoryCache {
+		res.Cached = true
+
+		bOut, err := json.Marshal(out)
+		if err != nil {
+			return res, err
+		}
+
+		cbr := cachedBaseResponse{
+			BaseResponse: res,
+			data:         bOut,
+		}
+
+		c.cache.Set(url, cbr)
 	}
 
 	return res, nil

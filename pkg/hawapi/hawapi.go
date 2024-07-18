@@ -3,6 +3,8 @@ package hawapi
 import (
 	"net/http"
 	"time"
+
+	"github.com/HawAPI/go-sdk/pkg/cache"
 )
 
 const (
@@ -66,6 +68,7 @@ type Options struct {
 type Client struct {
 	options Options
 	client  *http.Client
+	cache   cache.Cache
 }
 
 // NewClient creates a new HawAPI client using the default options.
@@ -81,6 +84,8 @@ func NewClientWithOpts(options Options) Client {
 	c.client = &http.Client{
 		Timeout: time.Duration(options.Timeout) * time.Second,
 	}
+
+	c.cache = cache.NewMemoryCache()
 	return c
 }
 
@@ -107,4 +112,14 @@ func (c *Client) WithOpts(options Options) {
 	}
 
 	c.options = options
+}
+
+// ClearCache deletes all values from the cache and returns the count of deleted items
+func (c *Client) ClearCache() int {
+	return c.cache.Clear()
+}
+
+// CacheSize returns the count cache items
+func (c *Client) CacheSize() int {
+	return c.cache.Size()
 }
