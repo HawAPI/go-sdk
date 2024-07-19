@@ -1,12 +1,19 @@
 package hawapi
 
 import (
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/HawAPI/go-sdk/pkg/cache"
+)
+
+var (
+	defaultTestLoggerHandler = NewFormattedHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError})
+	defaultTestLogger        = slog.New(defaultTestLoggerHandler)
 )
 
 func TestClient_buildUrl(t *testing.T) {
@@ -124,6 +131,7 @@ func TestClient_buildUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.fields.options.LogHandler = defaultTestLoggerHandler
 			c := NewClientWithOpts(tt.fields.options)
 
 			if got := c.buildUrl(tt.args.origin, tt.args.query); got != tt.want {
@@ -226,6 +234,7 @@ func TestClient_doRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.fields.options.LogHandler = defaultTestLoggerHandler
 			c := NewClientWithOpts(tt.fields.options)
 
 			sv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -387,6 +396,7 @@ func TestClient_doGetRequest(t *testing.T) {
 				options: tt.fields.options,
 				client:  server.Client(),
 				cache:   tt.fields.cache,
+				logger:  defaultTestLogger,
 			}
 
 			got, err := c.doGetRequest(tt.args.origin, tt.args.query, tt.args.out)
