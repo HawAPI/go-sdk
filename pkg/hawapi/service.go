@@ -116,7 +116,7 @@ func (c *Client) doGetRequest(origin string, query []QueryOptions, out any) (Bas
 		return res, err
 	}
 
-	headers := c.extractHeaders(httpHeader)
+	headers := extractHeaders(httpHeader)
 	res = BaseResponse{
 		HeaderResponse: headers,
 		Status:         http.StatusOK,
@@ -293,31 +293,31 @@ func pushOrOverwrite(params []string, key, value string) []string {
 	return append(params, fmt.Sprintf("%s=%s", key, value))
 }
 
-func (c *Client) extractHeaders(header http.Header) HeaderResponse {
+func extractHeaders(header http.Header) HeaderResponse {
 	var headers HeaderResponse
 
 	rateLimitRemaining := header.Get(apiHeaderRateLimitRemaining)
-	headers.Quota.Remaining = c.parseInt(rateLimitRemaining)
+	headers.Quota.Remaining = parseInt(rateLimitRemaining)
 
 	pageStr := header.Get(apiHeaderPageIndex)
-	headers.Page = c.parseInt(pageStr)
+	headers.Page = parseInt(pageStr)
 
 	pageSizeStr := header.Get(apiHeaderPageSize)
-	headers.PageSize = c.parseInt(pageSizeStr)
+	headers.PageSize = parseInt(pageSizeStr)
 
 	pageTotalStr := header.Get(apiHeaderPageTotal)
-	headers.PageTotal = c.parseInt(pageTotalStr)
+	headers.PageTotal = parseInt(pageTotalStr)
 
 	itemStr := header.Get(apiHeaderItemTotal)
-	headers.ItemSize = c.parseInt(itemStr)
+	headers.ItemSize = parseInt(itemStr)
 
 	lengthStr := header.Get(apiHeaderContentLength)
-	headers.Length = c.parseInt(lengthStr)
+	headers.Length = parseInt(lengthStr)
 
-	nextPage := c.handlePagination(headers.Page, true)
+	nextPage := handlePagination(headers.Page, true)
 	headers.NextPage = nextPage
 
-	prevPage := c.handlePagination(headers.Page, false)
+	prevPage := handlePagination(headers.Page, false)
 	headers.PrevPage = prevPage
 
 	headers.Etag = header.Get(apiHeaderEtag)
@@ -325,7 +325,7 @@ func (c *Client) extractHeaders(header http.Header) HeaderResponse {
 	return headers
 }
 
-func (c *Client) handlePagination(page int, increase bool) int {
+func handlePagination(page int, increase bool) int {
 	if page <= 0 {
 		return -1
 	}
@@ -343,14 +343,13 @@ func (c *Client) handlePagination(page int, increase bool) int {
 	return page
 }
 
-func (c *Client) parseInt(s string) int {
+func parseInt(s string) int {
 	if len(s) == 0 {
 		return -1
 	}
 
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		c.logger.Debug(fmt.Sprintf("failed to parse integer: %s", s))
 		return -1
 	}
 
