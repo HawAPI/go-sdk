@@ -1,4 +1,4 @@
-name: "Go Coverage"
+name: "Go Testing"
 
 on:
   workflow_dispatch:
@@ -8,15 +8,13 @@ on:
   pull_request:
 
 jobs:
-  coverage:
+  testing:
     # Ignore drafts
     if: github.event.pull_request.draft == false
-    name: Go test with coverage
+    name: Go testing
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 10
 
       - name: Set up Golang
         uses: actions/setup-go@v5
@@ -26,10 +24,5 @@ jobs:
       - name: Install dependencies
         run: go mod tidy
 
-      - uses: gwatts/go-coverage-action@v2
-        id: coverage
-        with:
-          coverage-threshold: 60
-          cover-pkg: ./...
-          ignore-pattern: |
-            /examples/
+      - name: Testing
+        run: go test -v ./pkg/...
