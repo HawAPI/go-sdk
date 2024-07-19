@@ -30,4 +30,6 @@ jobs:
         id: coverage
         with:
           coverage-threshold: 60
-          cover-pkg: ./pkg/...
+          cover-pkg: ./...
+          ignore-pattern: |
+            /examples/
