@@ -16,7 +16,7 @@ HawAPI SDK for Golang
 ## Installation
 
 ```
-go get github.com/HawAPI/go-sdk
+go get github.com/HawAPI/go-sdk@latest
 ```
 
 ## Usage
@@ -41,6 +41,9 @@ func main() {
     // Create client with custom options
     client = hawapi.NewClientWithOpts(hawapi.Options{
         Endpoint: "http://localhost:8080/api",
+        // When using 'WithOpts' or 'NewClientWithOpts' the value of
+        // 'UseInMemoryCache' will be set to false
+        UseInMemoryCache: true,
         // Version
         // Language
         // Token
@@ -50,6 +53,9 @@ func main() {
     // You can also change the options later
     client.WithOpts(hawapi.Options{
         Language: "pt-BR",
+        // When using 'WithOpts' or 'NewClientWithOpts' the value of
+        // 'UseInMemoryCache' will be set to false
+        UseInMemoryCache: true,
     })
 }
 ```
@@ -92,7 +98,7 @@ import (
 )
 
 func main() {
-    client := hawapi.NewClientWithOpts()
+    client := hawapi.NewClient()
     
     id, _ := uuid.Parse("<unknown uuid>")
     res, err := client.FindActor(id)
