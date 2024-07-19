@@ -21,7 +21,7 @@ jobs:
         run: go mod tidy
 
       - name: Testing
-        run: go test -v ./pkg/...
+        run: go test -v ./...
 
       - name: Publish to pkg.go.dev
         run: |

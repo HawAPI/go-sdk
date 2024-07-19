@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/HawAPI/go-sdk/pkg/hawapi"
+	"github.com/HawAPI/go-sdk/hawapi"
 )
 
 func main() {

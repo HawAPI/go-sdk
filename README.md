@@ -21,7 +21,7 @@ go get github.com/HawAPI/go-sdk@latest
 
 ## Usage
 
-- [See examples](./examples)
+- [See examples](./_examples)
 
 ### Init client
 
@@ -31,7 +31,7 @@ package main
 import (
   "fmt"
 
-  "github.com/HawAPI/go-sdk"
+  "github.com/HawAPI/go-sdk/hawapi"
 )
 
 func main() {
@@ -68,7 +68,7 @@ package main
 import (
   "fmt"
 
-  "github.com/HawAPI/go-sdk"
+  "github.com/HawAPI/go-sdk/hawapi"
 )
 
 func main() {
@@ -85,7 +85,7 @@ func main() {
 
 ### Error handling
 
-- Check out the [hawapi.ErrorResponse](./pkg/hawapi/error.go)
+- Check out the [hawapi.ErrorResponse](hawapi/error.go)
 
 ```go
 package main
@@ -93,7 +93,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/HawAPI/go-sdk"
+	"github.com/HawAPI/go-sdk/hawapi"
 	"github.com/google/uuid"
 )
 
