@@ -16,7 +16,7 @@ HawAPI SDK for Golang
 ## Installation
 
 ```
-go get github.com/HawAPI/go-sdk@latest
+go get github.com/HawAPI/go-sdk/hawapi@latest
 ```
 
 ## Usage
